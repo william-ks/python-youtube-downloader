@@ -1,7 +1,6 @@
 from messager import Messager
 from pytube import YouTube, Playlist
 from colorama import init, Fore as style
-import youtube_dl
 import os
 
 init(autoreset=True)
