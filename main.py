@@ -14,11 +14,11 @@ directory_manager = Directory()
 
 def get_url():
     global url
-    msg = 'do seu video' if download_type == 1 else 'da sua musica'
+    msg = "do seu video" if download_type == 1 else "da sua musica"
     print(f"{s.BLUE}Insira a URL {msg}:")
     url = str(input(f"{s.BLUE} -> {s.WHITE}"))
 
-    if url.strip() == '':
+    if url.strip() == "":
         messager.red_line()
         print(f"{s.RED}URL inválida.")
         messager.red_line()
@@ -35,29 +35,22 @@ def get_url():
 
 
 def is_a_url(url):
-    regex = (r'(https?://)?(www\.)?'
-             r'(youtube|youtu|youtube-nocookie)\.(com|be)/')
+    regex = r"(https?://)?(www\.)?" r"(youtube|youtu|youtube-nocookie)\.(com|be)/"
     result = bool(re.match(regex, url))
     return result
 
 
 def verify_list(url):
-    regex = re.compile(r'list=([^&]+)')
+    regex = re.compile(r"list=([^&]+)")
 
-    if 'list' in url:
+    if "list" in url:
         match = regex.search(url)
         playlist_id = match.group(1)
 
-        if 'playlist' in url:
-            return {
-                "type": "playlist",
-                "id": playlist_id
-            }
+        if "playlist" in url:
+            return {"type": "playlist", "id": playlist_id}
         else:
-            return {
-                "type": "list",
-                "id": playlist_id
-            }
+            return {"type": "list", "id": playlist_id}
     else:
         return None
 
@@ -83,20 +76,22 @@ def get_download_type():
 
 
 def all_music_quest(object):
-    if object['type'] == 'list':
-        print(
-            f"{s.BLUE}Você deseja baixar todos os videos da playlist ? [S/n]")
+    msg = "todos os videos" if download_type == 1 else "todas as musicas"
+
+    if object["type"] == "list":
+        print(f"{s.BLUE}Você deseja baixar {msg} da playlist ? [S/n]")
         anwser = input(f"{s.BLUE} -> {s.WHITE}")
 
-        if anwser.strip().lower() == 's':
-            playlist = yt.set_playlist(object['id'])
+        if anwser.lower() == "n":
+            playlist = yt.set_playlist(object["id"])
             return playlist
         else:
-            print(f'{s.BLUE}Escolhendo a opção padrão (Sim)')
+            print("ELSE")
+            print(f"{s.BLUE}Escolhendo a opção padrão (Sim)")
             messager.blue_line()
             return [url]
     else:
-        playlist = yt.set_playlist(object['id'])
+        playlist = yt.set_playlist(object["id"])
         return playlist
 
 
@@ -109,7 +104,8 @@ def main():
     get_download_type()
     get_url()
     directory = directory_manager.create_directory(
-        'Video' if download_type == 1 else 'Musica')
+        "Video" if download_type == 1 else "Musica"
+    )
 
     is_playlist = verify_list(url)
     if is_playlist:

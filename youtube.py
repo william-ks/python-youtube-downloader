@@ -1,19 +1,19 @@
 from messager import Messager
-from pytube import YouTube, Playlist
+from yt_dlp import YoutubeDL
 from colorama import init, Fore as style
 import os
 
 init(autoreset=True)
 
-
 class Youtube_manager():
     def __init__(self):
         self.messager = Messager()
-        self.yt = YouTube
 
     def set_playlist(self, id):
-        list = Playlist(f'https://www.youtube.com/playlist?list={id}')
-        return list.video_urls
+        playlist_url = f'https://www.youtube.com/playlist?list={id}'
+        with YoutubeDL({'quiet': True}) as ydl:
+            info = ydl.extract_info(playlist_url, download=False)
+            return [entry['url'] for entry in info['entries']]
 
     def download(self, type, link, directory):
         if type == 2:
@@ -24,42 +24,41 @@ class Youtube_manager():
 
     def download_music(self, url, directory):
         try:
-            video = self.yt(url)
-            stream = video.streams.filter(
-                only_audio=True, file_extension='mp4').first()
+            options = {
+                'format': 'bestaudio/best',
+                'postprocessors': [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'mp3',
+                    'preferredquality': '192',
+                }],
+                'outtmpl': os.path.join(directory, '%(title)s.%(ext)s'),
+                'ffmpeg_location': r'C:\Users\willk\Desktop\ffmpeg\bin',  # Caminho do FFmpeg
+                'quiet': False
+            }
 
-            print(f"{style.BLUE}Baixando áudio de {video.title}...")
+            print(f"{style.BLUE}Baixando áudio...")
+            with YoutubeDL(options) as ydl:
+                ydl.download([url])
 
-            if stream:
-                out_file = stream.download(output_path=str(directory))
-                base_name, ext = os.path.splitext(out_file)
-                new_file = base_name + '.mp3'
-                os.rename(out_file, new_file)
-                print(f"{style.GREEN}Download de {
-                      video.title} concluído com sucesso!")
-            else:
-                print(f"{style.RED}ERRO ao baixar {video.title}")
-                self.messager.red_line()
-
+            print(f"{style.GREEN}Download concluído com sucesso!")
         except Exception as e:
-            print(f"{style.RED}Erro ao baixar o vídeo {url}: {e}")
+            print(f"{style.RED}Erro ao baixar o áudio: {e}")
             self.messager.red_line()
 
     def download_video(self, url, directory):
         try:
-            video = self.yt(url)
-            stream = video.streams.filter(res='720p', file_extension='mp4').first()
+            options = {
+                'format': 'best[ext=mp4]/best',
+                'outtmpl': os.path.join(directory, '%(title)s.%(ext)s'),
+                'ffmpeg_location': r'C:\Users\willk\Desktop\ffmpeg\bin',  # Caminho do FFmpeg
+                'quiet': False
+            }
 
-            print(f"{style.BLUE}Baixando vídeo: {video.title}...")
+            print(f"{style.BLUE}Baixando vídeo...")
+            with YoutubeDL(options) as ydl:
+                ydl.download([url])
 
-            if stream:
-                out_file = stream.download(output_path=str(directory))
-                print(f"{style.GREEN}Download de {
-                      video.title} concluído com sucesso!")
-            else:
-                print(f"{style.RED}ERRO ao baixar {video.title}")
-                self.messager.red_line()
-
+            print(f"{style.GREEN}Download concluído com sucesso!")
         except Exception as e:
-            print(f"{style.RED}Erro ao baixar o vídeo {url}: {e}")
+            print(f"{style.RED}Erro ao baixar o vídeo: {e}")
             self.messager.red_line()
